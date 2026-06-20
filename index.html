@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.ui.min.js"></script>
     
-    <style>
+ <style>
         :root {
             --bg-base: #030305; --neon-green: #00ff66; --gold-primary: #d4af37;
             --gold-light: #f3e5ab; --electric-cyan: #00f0ff; --danger-red: #ff3333;
@@ -56,13 +56,27 @@
         .cat-btn:hover { background: rgba(255,255,255,0.1); }
         .cat-btn.active { background: var(--electric-cyan); color: #000; border-color: var(--electric-cyan); }
         
-        /* 💡 Grid Fix: Ensure perfect alignment on all devices */
-        .server-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; padding: 20px 25px 25px; max-height: 450px; overflow-y: auto; width: 100%; position: relative; z-index: 10;}
-        .server-grid::-webkit-scrollbar { width: 8px; }
-        .server-grid::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 8px; }
-        .server-grid::-webkit-scrollbar-thumb { background: var(--gold-primary); border-radius: 8px; }
+        /* 💡 100% FIXED GRID: তক্তা স্ক্রলবার গায়েব করার আসল জায়গা */
+        .server-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
+            gap: 12px; 
+            padding: 20px 25px 25px; 
+            max-height: 450px; 
+            overflow-y: auto; 
+            overflow-x: hidden; /* <-- KILL SWITCH: ডানে-বামের স্ক্রল চিরতরে লক */
+            width: 100%; 
+            position: relative; 
+            z-index: 10;
+        }
         
-        .channel-wrapper { position: relative; width: 100%; }
+        /* 💡 একদম সূক্ষ্ম প্রিমিয়াম স্ক্রলবার */
+        .server-grid::-webkit-scrollbar { width: 4px; height: 0px; }
+        .server-grid::-webkit-scrollbar-track { background: transparent; }
+        .server-grid::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.3); border-radius: 10px; }
+        .server-grid::-webkit-scrollbar-thumb:hover { background: rgba(212, 175, 55, 0.7); }
+        
+        .channel-wrapper { position: relative; width: 100%; min-width: 0; } /* min-width: 0 টেক্সটকে বাইরে ধাক্কা দিতে দেবে না */
         .server-btn { width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); color: #fff; padding: 14px 40px 14px 15px; border-radius: 8px; font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; letter-spacing: 1px; cursor: pointer; transition: all 0.3s ease; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
         .server-btn::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(212,175,55,0.2), transparent); transition: 0.5s; z-index: -1; }
         .server-btn:hover::before { left: 100%; }
@@ -100,14 +114,13 @@
             .time-display { font-size: 1rem; text-align: left !important; }
             .live-indicator { width: auto; font-size: 0.8rem; padding: 6px 15px; }
             
-            /* 💡 Mobile Grid 2 Columns Forced */
-            .server-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 15px; }
+            /* 💡 Mobile Grid overflow protection */
+            .server-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 15px; }
             .server-btn { padding: 12px 25px 12px 10px; font-size: 0.85rem; }
             .fav-btn { right: 5px; font-size: 1rem; }
         }
         @media (max-width: 480px) {
-            /* 💡 Small Mobile Grid 2 Columns Forced */
-            .server-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 12px; }
+            .server-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 12px; }
             .server-btn { padding: 10px 25px 10px 8px; font-size: 0.75rem; }
         }
     </style>
