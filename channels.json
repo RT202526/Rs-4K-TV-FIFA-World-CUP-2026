@@ -1,0 +1,15 @@
+{
+  "updated": "2026-06-20",
+  "servers": [
+    { "name": "US (EN) FS1", "url": "https://xyzstreams.shop/wc-1-embed", "category": "FIFA World Cup, 4K" },
+    { "name": "US (EN) FS1 4K (HEVC)", "url": "https://junkieembeds.pages.dev/embed/fox4k-usa", "category": "FIFA World Cup, 4K HEVC" },
+    { "name": "GB (EN) BBC", "url": "https://junkieembeds.pages.dev/embed/bbc-4k", "category": "Sports, HD" },
+    { "name": "CA (EN) TSN", "url": "https://xyzstreams.shop/wc-7-embed.html", "category": "Sports, HD" },
+    { "name": "CA (EN) TSN 4K", "url": "https://junkieembeds.pages.dev/embed/tsn-4k", "category": "Sports, 4K" },
+    { "name": "AR (ES) D Sports", "url": "https://xyzstreams.shop/wc-8-embed.html", "category": "FIFA World Cup, HD" },
+    { "name": "beIN Max (Arabic)", "url": "https://xyzstreams.shop/wc-10-embed.html", "category": "Sports, HD" },
+    { "name": "beIN Max 4K (Arabic)", "url": "https://1nyaler.streamhostingcdn.top/stream/94/index.m3u8", "category": "Sports, 4K HEVC" },
+    { "name": "US (ES) Telemundo", "url": "https://live.thebosstv.com:30443/dwlive/Somoy-TV/chunks.m3u8", "category": "Broadcast, HD" },
+    { "name": "FOX Direct", "url": "https://junkieembeds.pages.dev/embed/fox-usa", "category": "Direct, 4K" }
+  ]
+}
