@@ -6,6 +6,7 @@
     <title>RS 4K TV | FIFA WORLD CUP</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Rajdhani:wght@500;600;700;800&family=Great+Vibes&display=swap" rel="stylesheet">
     
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.ui.min.js"></script>
     
     <style>
@@ -28,7 +29,6 @@
         .glass-panel:hover::before { opacity: 1; }
         .glass-panel:hover { transform: translateY(-5px); border-color: rgba(212, 175, 55, 0.3); }
         
-        /* 💡 বর্ডার ট্রেস ফিক্সড: pointer-events: none যোগ করা হয়েছে যাতে ক্লিক ব্লক না হয় */
         .border-trace { position: absolute; inset: 0; border-radius: 16px; padding: 2px; background: linear-gradient(90deg, transparent, var(--gold-primary), transparent); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; opacity: 0; transition: opacity 0.4s; pointer-events: none; z-index: 1;}
         .glass-panel:hover .border-trace { opacity: 1; animation: trace 3s linear infinite; }
         @keyframes trace { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
@@ -47,7 +47,6 @@
         .player-wrapper iframe, .player-wrapper video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; z-index: 1; object-fit: cover;}
         .player-overlay { position: absolute; inset: 0; z-index: 5; background: #000; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); text-align: center; padding: 20px; transition: opacity 0.4s ease; opacity: 0; pointer-events: none; }
         
-        /* 💡 নেটিভ ব্রাউজার কন্ট্রোলস পুরোপুরি গায়েব করার সিএসএস */
         video::-webkit-media-controls { display: none !important; }
         video::-webkit-media-controls-enclosure { display: none !important; }
         
@@ -57,13 +56,14 @@
         .cat-btn:hover { background: rgba(255,255,255,0.1); }
         .cat-btn.active { background: var(--electric-cyan); color: #000; border-color: var(--electric-cyan); }
         
-        .server-grid { display: flex; flex-wrap: wrap; gap: 12px; padding: 20px 25px 25px; max-height: 450px; overflow-y: auto; width: 100%; position: relative; z-index: 10;}
+        /* 💡 Grid Fix: Ensure perfect alignment on all devices */
+        .server-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; padding: 20px 25px 25px; max-height: 450px; overflow-y: auto; width: 100%; position: relative; z-index: 10;}
         .server-grid::-webkit-scrollbar { width: 8px; }
         .server-grid::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 8px; }
         .server-grid::-webkit-scrollbar-thumb { background: var(--gold-primary); border-radius: 8px; }
         
-        .channel-wrapper { display: flex; position: relative; flex: 1 1 calc(33.333% - 12px); min-width: 200px; }
-        .server-btn { width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); color: #fff; padding: 14px 45px 14px 20px; border-radius: 8px; font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; letter-spacing: 1px; cursor: pointer; transition: all 0.3s ease; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
+        .channel-wrapper { position: relative; width: 100%; }
+        .server-btn { width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); color: #fff; padding: 14px 40px 14px 15px; border-radius: 8px; font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; letter-spacing: 1px; cursor: pointer; transition: all 0.3s ease; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
         .server-btn::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(212,175,55,0.2), transparent); transition: 0.5s; z-index: -1; }
         .server-btn:hover::before { left: 100%; }
         .server-btn:hover { border-color: var(--gold-primary); transform: translateY(-2px); }
@@ -92,7 +92,6 @@
         
         @media (max-width: 1200px) { 
             .container { display: flex; flex-direction: column; } 
-            .channel-wrapper { flex: 1 1 calc(50% - 12px); } 
         }
         @media (max-width: 768px) {
             header { padding: 15px; flex-direction: column; gap: 10px; align-items: flex-start; text-align: left; }
@@ -100,9 +99,16 @@
             .header-meta { width: 100%; justify-content: space-between; flex-direction: row; gap: 10px; }
             .time-display { font-size: 1rem; text-align: left !important; }
             .live-indicator { width: auto; font-size: 0.8rem; padding: 6px 15px; }
-            .channel-wrapper { flex: 1 1 calc(50% - 10px); min-width: 140px; } 
-            .server-btn { padding: 12px 30px 12px 10px; font-size: 0.85rem; text-align: center; justify-content: center;}
-            .fav-btn { right: 8px; font-size: 1rem; }
+            
+            /* 💡 Mobile Grid 2 Columns Forced */
+            .server-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 15px; }
+            .server-btn { padding: 12px 25px 12px 10px; font-size: 0.85rem; }
+            .fav-btn { right: 5px; font-size: 1rem; }
+        }
+        @media (max-width: 480px) {
+            /* 💡 Small Mobile Grid 2 Columns Forced */
+            .server-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 12px; }
+            .server-btn { padding: 10px 25px 10px 8px; font-size: 0.75rem; }
         }
     </style>
 </head>
@@ -180,7 +186,9 @@
         let favorites = JSON.parse(localStorage.getItem('rs_favs')) || [];
         let activeCategory = "All";
         let currentPlayingUrl = "";
+        
         let shakaPlayer = null;
+        let hlsInstance = null;
 
         const serverContainer = document.getElementById('server-container');
         const categoryContainer = document.getElementById('category-container');
@@ -191,7 +199,6 @@
         const playerMsg = document.getElementById('player-msg');
         const playerWrapper = document.getElementById('player-container');
 
-        // 💡 ডাবল-ক্লিকে ফুলস্ক্রিন ফিচার
         playerWrapper.addEventListener('dblclick', () => {
             if (!document.fullscreenElement) {
                 playerWrapper.requestFullscreen().catch(err => console.log(err));
@@ -200,7 +207,8 @@
             }
         });
 
-        async function initPlayer() {
+        // 💡 Initialize Shaka Only Once for DRM
+        async function initShakaPlayer() {
             if (typeof shaka !== 'undefined') {
                 shaka.polyfill.installAll(); 
                 if (shaka.Player.isBrowserSupported()) {
@@ -211,7 +219,7 @@
         }
 
         function onPlayerError(error) {
-            console.error('Shaka Error:', error);
+            console.error('Player Error:', error);
             const currentChan = rawServers.find(s => s.url === currentPlayingUrl);
             if (currentChan && currentChan.embedUrl) {
                 switchToEmbed(currentChan.embedUrl);
@@ -222,11 +230,19 @@
         }
 
         function switchToEmbed(embedUrl) {
-            if(shakaPlayer) shakaPlayer.unload();
             shakaContainer.style.display = 'none';
             mainIframe.style.display = 'block';
             mainIframe.src = embedUrl;
             playerOverlay.style.opacity = '0';
+        }
+
+        async function stopAllPlayers() {
+            if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+            if (shakaPlayer) { await shakaPlayer.unload(); }
+            mainVideo.pause();
+            mainVideo.removeAttribute('src');
+            mainVideo.load();
+            mainIframe.src = "";
         }
 
         function renderCategories() {
@@ -271,15 +287,16 @@
             });
         }
 
+        // 🚀 DUAL ENGINE LOGIC: HLS.js for Speed, Shaka for DRM Power
         async function loadStream(server) {
             currentPlayingUrl = server.url;
             renderChannels();
             playerOverlay.style.opacity = '1';
             playerMsg.innerHTML = 'CONNECTING SECURELY...';
             
-            mainIframe.src = "";
-            if(shakaPlayer) await shakaPlayer.unload();
+            await stopAllPlayers();
 
+            // কন্ডিশন ১: ভারী DRM চ্যানেল (Shaka Player ব্যবহার হবে)
             if (server.type === 'mpd' && server.drm_type === 'clearkey') {
                 mainIframe.style.display = 'none'; 
                 shakaContainer.style.display = 'block';
@@ -289,19 +306,36 @@
                     playerOverlay.style.opacity = '0';
                 } catch (e) { onPlayerError(e); }
             } 
+            // কন্ডিশন ২: সাধারণ দ্রুত চ্যানেল (HLS.js ব্যবহার হবে)
             else if (server.type === 'hls' || server.url.includes('.m3u8')) {
                 mainIframe.style.display = 'none'; 
                 shakaContainer.style.display = 'block';
-                try {
-                    await shakaPlayer.load(server.url);
-                    playerOverlay.style.opacity = '0';
-                } catch (e) { 
-                    if(server.embedUrl) switchToEmbed(server.embedUrl);
-                    else onPlayerError(e);
+                
+                if (Hls.isSupported()) {
+                    hlsInstance = new Hls();
+                    hlsInstance.loadSource(server.url);
+                    hlsInstance.attachMedia(mainVideo);
+                    hlsInstance.on(Hls.Events.MANIFEST_PARSED, function() {
+                        mainVideo.play().catch(e => console.log(e));
+                        playerOverlay.style.opacity = '0';
+                    });
+                    hlsInstance.on(Hls.Events.ERROR, function(event, data) {
+                        if (data.fatal) {
+                            if(server.embedUrl) switchToEmbed(server.embedUrl);
+                            else onPlayerError(data);
+                        }
+                    });
+                } else if (mainVideo.canPlayType('application/vnd.apple.mpegurl')) {
+                    mainVideo.src = server.url;
+                    mainVideo.addEventListener('loadedmetadata', function() {
+                        mainVideo.play();
+                        playerOverlay.style.opacity = '0';
+                    });
                 }
             } 
+            // কন্ডিশন ৩: ডিরেক্ট ওয়েব সোর্স বা আইফ্রেম
             else {
-                switchToEmbed(server.url);
+                switchToEmbed(server.embedUrl || server.url);
             }
         }
 
@@ -317,7 +351,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
-            await initPlayer();
+            await initShakaPlayer();
             loadChannels();
             setInterval(() => { document.getElementById('local-time').textContent = new Date().toLocaleTimeString('en-US', {hour12: false}); }, 1000);
             
