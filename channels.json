@@ -9,6 +9,13 @@
       "type": "hls"
     },
     {
+      "name": "DA NA (FHD)",
+      "url": "https://1nyaler.streamhostingcdn.top/stream/94/index.m3u8",
+      "embedUrl": "",
+      "category": "FIFA World Cup,4K",
+      "type": "hls"
+    },
+    {
       "name": "FOX (4K HEVC)",
       "url": "https://streamxyz.shop/fox4k/index.m3u8",
       "embedUrl": "https://xyzstreams.shop/wc-5-embed.html",
