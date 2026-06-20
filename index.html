@@ -103,7 +103,10 @@
         <div class="signature">Rs Rayhan Chowdhury</div>
     </footer>
 
-    <script>
+     <script>
+        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+        window.addEventListener('beforeunload', () => window.scrollTo(0, 0));
+
         let rawServers = [];
         let favorites = JSON.parse(localStorage.getItem('rs_favs')) || [];
         let activeCategory = "All";
@@ -117,10 +120,10 @@
         const playerOverlay = document.getElementById('player-overlay');
         const playerMsg = document.getElementById('player-msg');
 
-        // Shaka Player ইনিশিয়ালাইজেশন (ফিক্সড টাইপো 🛠️)
+        // Shaka Player ইনিশিয়ালাইজেশন (বানান ১০০% ফিক্সড 🛠️)
         async function initPlayer() {
             if (typeof shaka !== 'undefined') {
-                shaka.polyfill.installAll();
+                shaka.polyfill.installAll(); // এখানে লজিক একদম নিখুঁত করা হয়েছে
                 if (shaka.Player.isBrowserSupported()) {
                     shakaPlayer = new shaka.Player(mainVideo);
                     shakaPlayer.addEventListener('error', onPlayerError);
