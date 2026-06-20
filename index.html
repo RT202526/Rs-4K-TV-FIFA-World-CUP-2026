@@ -7,7 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Rajdhani:wght@500;600;700;800&family=Great+Vibes&display=swap" rel="stylesheet">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.ui.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/controls.min.css">
     
     <style>
         :root {
@@ -18,6 +17,7 @@
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { font-family: var(--font-ui); background-color: var(--bg-base); color: #ffffff; min-height: 100vh; max-width: 100vw; overflow-x: hidden; position: relative; }
+        
         #particles-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; }
         .animate-up { animation: fadeUp 0.8s ease-out forwards; opacity: 0; transform: translateY(30px); }
         .delay-1 { animation-delay: 0.2s; }
@@ -28,7 +28,8 @@
         .glass-panel:hover::before { opacity: 1; }
         .glass-panel:hover { transform: translateY(-5px); border-color: rgba(212, 175, 55, 0.3); }
         
-        .border-trace { position: absolute; inset: 0; border-radius: 16px; padding: 2px; background: linear-gradient(90deg, transparent, var(--gold-primary), transparent); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; opacity: 0; transition: opacity 0.4s; }
+        /* 💡 বর্ডার ট্রেস ফিক্সড: pointer-events: none যোগ করা হয়েছে যাতে ক্লিক ব্লক না হয় */
+        .border-trace { position: absolute; inset: 0; border-radius: 16px; padding: 2px; background: linear-gradient(90deg, transparent, var(--gold-primary), transparent); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; opacity: 0; transition: opacity 0.4s; pointer-events: none; z-index: 1;}
         .glass-panel:hover .border-trace { opacity: 1; animation: trace 3s linear infinite; }
         @keyframes trace { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
         @keyframes pulse-live { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 51, 51, 0.7); } 70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(255, 51, 51, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 51, 51, 0); } }
@@ -42,17 +43,21 @@
         
         .container { width: 100%; max-width: 1800px; margin: 30px auto; padding: 0 20px; display: grid; grid-template-columns: 2.2fr 1fr; gap: 30px; box-sizing: border-box; }
         
-        .player-wrapper { position: relative; width: 100%; padding-top: 56.25%; border-radius: 16px; overflow: hidden; background: #000; border: 1px solid rgba(212, 175, 55, 0.2); box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(212, 175, 55, 0.1); }
-        .player-wrapper iframe, .player-wrapper video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; z-index: 1; }
+        .player-wrapper { position: relative; width: 100%; padding-top: 56.25%; border-radius: 16px; overflow: hidden; background: #000; border: 1px solid rgba(212, 175, 55, 0.2); box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(212, 175, 55, 0.1); cursor: pointer; }
+        .player-wrapper iframe, .player-wrapper video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; z-index: 1; object-fit: cover;}
         .player-overlay { position: absolute; inset: 0; z-index: 5; background: #000; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); text-align: center; padding: 20px; transition: opacity 0.4s ease; opacity: 0; pointer-events: none; }
         
-        .category-bar { display: flex; gap: 10px; padding: 15px 25px 0; overflow-x: auto; scrollbar-width: none; width: 100%; }
+        /* 💡 নেটিভ ব্রাউজার কন্ট্রোলস পুরোপুরি গায়েব করার সিএসএস */
+        video::-webkit-media-controls { display: none !important; }
+        video::-webkit-media-controls-enclosure { display: none !important; }
+        
+        .category-bar { display: flex; gap: 10px; padding: 15px 25px 0; overflow-x: auto; scrollbar-width: none; width: 100%; position: relative; z-index: 10;}
         .category-bar::-webkit-scrollbar { display: none; }
-        .cat-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: #aaa; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-family: var(--font-ui); font-weight: 600; white-space: nowrap; transition: 0.3s; }
+        .cat-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: #aaa; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-family: var(--font-ui); font-weight: 600; white-space: nowrap; transition: 0.3s; position: relative; z-index: 10;}
         .cat-btn:hover { background: rgba(255,255,255,0.1); }
         .cat-btn.active { background: var(--electric-cyan); color: #000; border-color: var(--electric-cyan); }
         
-        .server-grid { display: flex; flex-wrap: wrap; gap: 12px; padding: 20px 25px 25px; max-height: 450px; overflow-y: auto; width: 100%; }
+        .server-grid { display: flex; flex-wrap: wrap; gap: 12px; padding: 20px 25px 25px; max-height: 450px; overflow-y: auto; width: 100%; position: relative; z-index: 10;}
         .server-grid::-webkit-scrollbar { width: 8px; }
         .server-grid::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 8px; }
         .server-grid::-webkit-scrollbar-thumb { background: var(--gold-primary); border-radius: 8px; }
@@ -72,7 +77,6 @@
         .panel-content { padding: 25px; min-height: 150px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .unavailable-text { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; color: #ff4444; text-shadow: 0 0 15px rgba(255,0,0,0.4); text-align: center; letter-spacing: 1px; }
         
-        /* 🛡️ Firefox Notice Styles */
         .browser-notice { background: rgba(255,215,0,0.08); border: 1px solid rgba(255,215,0,0.25); border-radius: 16px; padding: 18px; text-align: center; width: 100%;}
         .browser-notice h3 { color: #ffd700; margin-bottom: 8px; font-family: var(--font-display); letter-spacing: 1px;}
         .browser-notice p { color: #fff; margin: 5px 0 15px 0; font-size: 0.9rem;}
@@ -118,13 +122,16 @@
     <main class="container">
         
         <div class="animate-up" style="display: flex; flex-direction: column; gap: 20px; width: 100%;">
-            <div class="player-wrapper">
+            <div class="player-wrapper" id="player-container">
                 <div id="player-overlay" class="player-overlay"><span id="player-msg" style="font-size: 1.2rem; font-weight: 700;">CONNECTING...</span></div>
+                
                 <iframe id="main-iframe" src="" allowfullscreen="true" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" scrolling="no" frameborder="0" style="display:none;"></iframe>
-                <div data-shaka-player-container style="width:100%; height:100%;">
-                    <video id="main-video" autoplay playsinline style="display:none; width:100%; height:100%; background:#000;"></video>
+                
+                <div id="shaka-container" style="display:none; width:100%; height:100%; position:absolute; top:0; left:0; z-index:2;">
+                    <video id="main-video" autoplay playsinline style="width:100%; height:100%; background:#000; outline:none; border:none;"></video>
                 </div>
             </div>
+            
             <div class="glass-panel">
                 <div class="border-trace"></div>
                 <div class="panel-header">📡 SELECT BROADCAST NETWORK</div>
@@ -178,19 +185,27 @@
         const serverContainer = document.getElementById('server-container');
         const categoryContainer = document.getElementById('category-container');
         const mainIframe = document.getElementById('main-iframe');
+        const shakaContainer = document.getElementById('shaka-container');
         const mainVideo = document.getElementById('main-video');
         const playerOverlay = document.getElementById('player-overlay');
         const playerMsg = document.getElementById('player-msg');
+        const playerWrapper = document.getElementById('player-container');
 
-        // Shaka Player ইনিশিয়ালাইজেশন
+        // 💡 ডাবল-ক্লিকে ফুলস্ক্রিন ফিচার
+        playerWrapper.addEventListener('dblclick', () => {
+            if (!document.fullscreenElement) {
+                playerWrapper.requestFullscreen().catch(err => console.log(err));
+            } else {
+                document.exitFullscreen();
+            }
+        });
+
         async function initPlayer() {
             if (typeof shaka !== 'undefined') {
-                shaka.polyfill.installAll(); // Typo Fixed here
+                shaka.polyfill.installAll(); 
                 if (shaka.Player.isBrowserSupported()) {
                     shakaPlayer = new shaka.Player(mainVideo);
                     shakaPlayer.addEventListener('error', onPlayerError);
-                } else {
-                    console.error('Browser not supported for Shaka!');
                 }
             }
         }
@@ -199,7 +214,6 @@
             console.error('Shaka Error:', error);
             const currentChan = rawServers.find(s => s.url === currentPlayingUrl);
             if (currentChan && currentChan.embedUrl) {
-                console.log("Switching to backup embed due to error...");
                 switchToEmbed(currentChan.embedUrl);
             } else {
                 playerOverlay.style.opacity = '1';
@@ -209,7 +223,7 @@
 
         function switchToEmbed(embedUrl) {
             if(shakaPlayer) shakaPlayer.unload();
-            mainVideo.style.display = 'none';
+            shakaContainer.style.display = 'none';
             mainIframe.style.display = 'block';
             mainIframe.src = embedUrl;
             playerOverlay.style.opacity = '0';
@@ -267,21 +281,17 @@
             if(shakaPlayer) await shakaPlayer.unload();
 
             if (server.type === 'mpd' && server.drm_type === 'clearkey') {
-                mainIframe.style.display = 'none'; mainVideo.style.display = 'block';
+                mainIframe.style.display = 'none'; 
+                shakaContainer.style.display = 'block';
                 try {
-                    shakaPlayer.configure({
-                        drm: {
-                            clearKeys: {
-                                [server.keyId]: server.key
-                            }
-                        }
-                    });
+                    shakaPlayer.configure({ drm: { clearKeys: { [server.keyId]: server.key } } });
                     await shakaPlayer.load(server.url);
                     playerOverlay.style.opacity = '0';
                 } catch (e) { onPlayerError(e); }
             } 
             else if (server.type === 'hls' || server.url.includes('.m3u8')) {
-                mainIframe.style.display = 'none'; mainVideo.style.display = 'block';
+                mainIframe.style.display = 'none'; 
+                shakaContainer.style.display = 'block';
                 try {
                     await shakaPlayer.load(server.url);
                     playerOverlay.style.opacity = '0';
@@ -311,8 +321,7 @@
             loadChannels();
             setInterval(() => { document.getElementById('local-time').textContent = new Date().toLocaleTimeString('en-US', {hour12: false}); }, 1000);
             
-            // API Logic 
-            const API_KEY = ""; // Put your API Key here when ready
+            const API_KEY = ""; 
             const API_BASE = "https://v3.football.api-sports.io";
             const API_HEADERS = { "x-rapidapi-host": "v3.football.api-sports.io", "x-apisports-key": API_KEY };
             const liveContainer = document.getElementById('api-live-match');
@@ -341,8 +350,7 @@
                 } catch (error) { console.log(error); }
             }
             fetchRealFootballData();
-
-            // কণা অ্যানিমেশন স্ক্রিপ্ট
+            
             const canvas = document.getElementById('particles-bg'); const ctx = canvas.getContext('2d'); let particles = [];
             function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
             window.addEventListener('resize', resizeCanvas); resizeCanvas();
