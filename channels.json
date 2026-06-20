@@ -2,74 +2,116 @@
   "updated": "2026-06-21",
   "servers": [
     {
-      "name": "FOX",
-      "url": "https://streamxyz.shop/FOX/index.m3u8",
-      "embedUrl": "https://xyzstreams.shop/wc-1-embed.html",
-      "category": "FIFA World Cup,4K",
+      "name": "Fox Streams",
+      "url": "https://xyzstreams.shop/wc-1-embed",
+      "embedUrl": "https://xyzstreams.shop/wc-1-embed",
+      "category": "FIFA World Cup,Sports",
+      "type": "embed"
+    },
+    {
+      "name": "FIFA Special 4K — Stream 1",
+      "url": "https://1nyaler.streamhostingcdn.top/stream/94/index.m3u8",
+      "embedUrl": "",
+      "category": "FIFA World Cup,Sports,4K",
       "type": "hls"
     },
     {
-      "name": "DA NA (FHD)",
-      "url": "https://1nyaler.streamhostingcdn.top/stream/94/index.m3u8",
-      "embedUrl": "",
+      "name": "FOX",
+      "url": "https://junkieembeds.pages.dev/embed/fox-usa",
+      "embedUrl": "https://junkieembeds.pages.dev/embed/fox-usa",
       "category": "FIFA World Cup,4K",
-      "type": "hls"
+      "type": "embed"
     },
     {
       "name": "FOX (4K HEVC)",
-      "url": "https://streamxyz.shop/fox4k/index.m3u8",
-      "embedUrl": "https://xyzstreams.shop/wc-5-embed.html",
+      "url": "https://junkieembeds.pages.dev/embed/fox4k-usa",
+      "embedUrl": "https://junkieembeds.pages.dev/embed/fox4k-usa",
       "category": "FIFA World Cup,4K",
-      "type": "hls"
+      "type": "embed"
     },
     {
-      "name": "CA (EN) ITV",
-      "url": "https://streamxyz.shop/ITV/index.m3u8",
-      "embedUrl": "https://xyzstreams.shop/wc-3-embed.html",
+      "name": "US (EN) FOX 4K (HEVC)",
+      "url": "https://xyzstreams.shop/wc-5-embed.html",
+      "embedUrl": "https://xyzstreams.shop/wc-5-embed.html",
       "category": "FIFA World Cup,Sports",
-      "type": "hls"
+      "type": "embed"
     },
     {
-      "name": "CA (EN) TSN",
-      "url": "https://streamxyz.shop/tsn1/index.m3u8",
+      "name": "CA TNS Streams",
+      "url": "https://xyzstreams.shop/wc-7-embed.html",
       "embedUrl": "https://xyzstreams.shop/wc-7-embed.html",
       "category": "FIFA World Cup,Sports,4K",
-      "type": "hls"
+      "type": "embed"
     },
     {
-      "name": "CA (EN) TSN 4K",
-      "url": "https://streamxyz.shop/tsn4k/index.m3u8",
+      "name": "TSN (4K HEVC)",
+      "url": "https://junkieembeds.pages.dev/embed/tsn-4k",
+      "embedUrl": "https://junkieembeds.pages.dev/embed/tsn-4k",
+      "category": "Sports,FIFA World Cup,4K",
+      "type": "embed"
+    },
+    {
+      "name": "🇨🇦 (EN) TSN 4K",
+      "url": "https://xyzstreams.shop/wc-8-embed.html",
       "embedUrl": "https://xyzstreams.shop/wc-8-embed.html",
       "category": "FIFA World Cup,Sports,4K",
+      "type": "embed"
+    },
+    {
+      "name": "FUSSBALL TV 1 UHD",
+      "url": "https://junkieembeds.pages.dev/embed/fusballtv1uhd-de",
+      "embedUrl": "https://junkieembeds.pages.dev/embed/fusballtv1uhd-de",
+      "category": "Sports,FIFA World Cup,4K",
+      "type": "embed"
+    },
+    {
+      "name": "FUSSBALL TV 2 4k",
+      "url": "https://junkieembeds.pages.dev/embed/fusballtv2uhd-de",
+      "embedUrl": "https://junkieembeds.pages.dev/embed/fusballtv2uhd-de",
+      "category": "Sports,FIFA World Cup,4K",
+      "type": "embed"
+    },
+    {
+      "name": "Fusball TV1",
+      "url": "https://junkieembeds.pages.dev/embed/fusballtvuhd-de",
+      "embedUrl": "https://junkieembeds.pages.dev/embed/fusballtvuhd-de",
+      "category": "FIFA World Cup,Sports,4K",
+      "type": "embed"
+    },
+    {
+      "name": "Somoy TV",
+      "url": "https://live.thebosstv.com:30443/dwlive/Somoy-TV/chunks.m3u8",
+      "embedUrl": "",
+      "category": "Bangladesh",
       "type": "hls"
     },
     {
-      "name": "Aa (ES) D Sports",
-      "url": "https://streamxyz.shop/dsports1arg/index.m3u8",
+      "name": "Caze TV 4K",
+      "url": "https://dfr80qz435crc.cloudfront.net/MNOP/Amagi/Caze/Caze_TV_BR/1080p-vtt/index.m3u8",
       "embedUrl": "",
       "category": "Sports",
       "type": "hls"
     },
     {
-      "name": "beIN Max (Arabic)",
-      "url": "https://streamxyz.shop/bein/index.m3u8",
-      "embedUrl": "https://xyzstreams.shop/wc-11-embed.html",
-      "category": "FIFA World Cup,Sports,4K",
+      "name": "Sangeet Bangla",
+      "url": "https://cdn-4.pishow.tv/live/1143/master.m3u8",
+      "embedUrl": "",
+      "category": "Music",
       "type": "hls"
+    },
+    {
+      "name": "Fox Cricket",
+      "url": "https://junkieembeds.pages.dev/embed/fox-sports-501",
+      "embedUrl": "https://junkieembeds.pages.dev/embed/fox-sports-501",
+      "category": "FIFA World Cup,Sports,4K",
+      "type": "embed"
     },
     {
       "name": "beIN Max 4K (Arabic) (HEVC)",
-      "url": "https://streamxyz.shop/bein4k/index.m3u8",
+      "url": "https://xyzstreams.shop/wc-10-embed.html",
       "embedUrl": "https://xyzstreams.shop/wc-10-embed.html",
       "category": "FIFA World Cup,Sports,4K",
-      "type": "hls"
-    },
-    {
-      "name": "us (ES) Telemundo",
-      "url": "https://streamxyz.shop/Telemundo/index.m3u8",
-      "embedUrl": "https://xyzstreams.shop/wc-6-embed.html",
-      "category": "FIFA World Cup,Sports",
-      "type": "hls"
+      "type": "embed"
     },
     {
       "name": "FOX Direct (MPEG-DASH)",
