@@ -30,10 +30,10 @@
       "type": "hls"
     },
     {
-      "name": "BBC (FHD ",
+      "name": "BBC (FHD)",
       "url": "https://embed.st/embed/admin/ppv-tunisia-vs-japan/5",
       "embedUrl": "https://junkieembeds.pages.dev/embed/fox-usa",
-      "category": "FIFA World Cup,",
+      "category": "FIFA World Cup,Sports",
       "type": "embed"
     },
     {
@@ -86,7 +86,7 @@
       "type": "embed"
     },
     {
-      "name": "Fusball TV1",
+      "name": "Fussball TV1",
       "url": "https://junkieembeds.pages.dev/embed/fusballtvuhd-de",
       "embedUrl": "https://findleembeds.pages.dev/embed/fusballtvuhd-de",
       "category": "FIFA World Cup,Sports,4K",
@@ -140,14 +140,14 @@
     {
       "name": "Balle Balle Music",
       "url": "https://mcncdndigital.com/balleballetv/index.m3u8",
-      "embedUrl": " ",
+      "embedUrl": "",
       "category": "Music",
       "type": "hls"
     },
     {
       "name": "Panjabi Hits Song",
       "url": "https://stream.ottlive.co.in/punjabihits/tracks-v1a1/mono.m3u8",
-      "embedUrl": " ",
+      "embedUrl": "",
       "category": "Music",
       "type": "hls"
     }
