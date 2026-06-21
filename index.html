@@ -6,10 +6,10 @@
     <title>RS 4K TV | FIFA WORLD CUP</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Rajdhani:wght@500;600;700;800&family=Great+Vibes&display=swap" rel="stylesheet">
     
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.ui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dash-shaka-playback@3.0.0/dist/dash-shaka-playback.min.js"></script>
     
- <style>
+    <style>
         :root {
             --bg-base: #030305; --neon-green: #00ff66; --gold-primary: #d4af37;
             --gold-light: #f3e5ab; --electric-cyan: #00f0ff; --danger-red: #ff3333;
@@ -44,11 +44,8 @@
         .container { width: 100%; max-width: 1800px; margin: 30px auto; padding: 0 20px; display: grid; grid-template-columns: 2.2fr 1fr; gap: 30px; box-sizing: border-box; }
         
         .player-wrapper { position: relative; width: 100%; padding-top: 56.25%; border-radius: 16px; overflow: hidden; background: #000; border: 1px solid rgba(212, 175, 55, 0.2); box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(212, 175, 55, 0.1); cursor: pointer; }
-        .player-wrapper iframe, .player-wrapper video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; z-index: 1; object-fit: cover;}
+        .player-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; z-index: 1; object-fit: cover;}
         .player-overlay { position: absolute; inset: 0; z-index: 5; background: #000; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); text-align: center; padding: 20px; transition: opacity 0.4s ease; opacity: 0; pointer-events: none; }
-        
-        video::-webkit-media-controls { display: none !important; }
-        video::-webkit-media-controls-enclosure { display: none !important; }
         
         .category-bar { display: flex; gap: 10px; padding: 15px 25px 0; overflow-x: auto; scrollbar-width: none; width: 100%; position: relative; z-index: 10;}
         .category-bar::-webkit-scrollbar { display: none; }
@@ -56,7 +53,6 @@
         .cat-btn:hover { background: rgba(255,255,255,0.1); }
         .cat-btn.active { background: var(--electric-cyan); color: #000; border-color: var(--electric-cyan); }
         
-        /* 💡 100% FIXED GRID: তক্তা স্ক্রলবার গায়েব করার আসল জায়গা */
         .server-grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
@@ -64,19 +60,18 @@
             padding: 20px 25px 25px; 
             max-height: 450px; 
             overflow-y: auto; 
-            overflow-x: hidden; /* <-- KILL SWITCH: ডানে-বামের স্ক্রল চিরতরে লক */
+            overflow-x: hidden; 
             width: 100%; 
             position: relative; 
             z-index: 10;
         }
         
-        /* 💡 একদম সূক্ষ্ম প্রিমিয়াম স্ক্রলবার */
         .server-grid::-webkit-scrollbar { width: 4px; height: 0px; }
         .server-grid::-webkit-scrollbar-track { background: transparent; }
         .server-grid::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.3); border-radius: 10px; }
         .server-grid::-webkit-scrollbar-thumb:hover { background: rgba(212, 175, 55, 0.7); }
         
-        .channel-wrapper { position: relative; width: 100%; min-width: 0; } /* min-width: 0 টেক্সটকে বাইরে ধাক্কা দিতে দেবে না */
+        .channel-wrapper { position: relative; width: 100%; min-width: 0; } 
         .server-btn { width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); color: #fff; padding: 14px 40px 14px 15px; border-radius: 8px; font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; letter-spacing: 1px; cursor: pointer; transition: all 0.3s ease; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
         .server-btn::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(212,175,55,0.2), transparent); transition: 0.5s; z-index: -1; }
         .server-btn:hover::before { left: 100%; }
@@ -114,7 +109,6 @@
             .time-display { font-size: 1rem; text-align: left !important; }
             .live-indicator { width: auto; font-size: 0.8rem; padding: 6px 15px; }
             
-            /* 💡 Mobile Grid overflow protection */
             .server-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 15px; }
             .server-btn { padding: 12px 25px 12px 10px; font-size: 0.85rem; }
             .fav-btn { right: 5px; font-size: 1rem; }
@@ -146,9 +140,7 @@
                 
                 <iframe id="main-iframe" src="" allowfullscreen="true" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" scrolling="no" frameborder="0" style="display:none;"></iframe>
                 
-                <div id="shaka-container" style="display:none; width:100%; height:100%; position:absolute; top:0; left:0; z-index:2;">
-                    <video id="main-video" autoplay playsinline style="width:100%; height:100%; background:#000; outline:none; border:none;"></video>
-                </div>
+                <div id="clappr-container" style="display:none; width:100%; height:100%; position:absolute; top:0; left:0; z-index:2;"></div>
             </div>
             
             <div class="glass-panel">
@@ -200,14 +192,12 @@
         let activeCategory = "All";
         let currentPlayingUrl = "";
         
-        let shakaPlayer = null;
-        let hlsInstance = null;
+        let clapprPlayer = null;
 
         const serverContainer = document.getElementById('server-container');
         const categoryContainer = document.getElementById('category-container');
         const mainIframe = document.getElementById('main-iframe');
-        const shakaContainer = document.getElementById('shaka-container');
-        const mainVideo = document.getElementById('main-video');
+        const clapprContainer = document.getElementById('clappr-container');
         const playerOverlay = document.getElementById('player-overlay');
         const playerMsg = document.getElementById('player-msg');
         const playerWrapper = document.getElementById('player-container');
@@ -220,41 +210,15 @@
             }
         });
 
-        // 💡 Initialize Shaka Only Once for DRM
-        async function initShakaPlayer() {
-            if (typeof shaka !== 'undefined') {
-                shaka.polyfill.installAll(); 
-                if (shaka.Player.isBrowserSupported()) {
-                    shakaPlayer = new shaka.Player(mainVideo);
-                    shakaPlayer.addEventListener('error', onPlayerError);
-                }
-            }
-        }
-
-        function onPlayerError(error) {
-            console.error('Player Error:', error);
-            const currentChan = rawServers.find(s => s.url === currentPlayingUrl);
-            if (currentChan && currentChan.embedUrl) {
-                switchToEmbed(currentChan.embedUrl);
-            } else {
-                playerOverlay.style.opacity = '1';
-                playerMsg.innerHTML = 'Stream Offline or Blocked by CORS.';
-            }
-        }
-
         function switchToEmbed(embedUrl) {
-            shakaContainer.style.display = 'none';
+            clapprContainer.style.display = 'none';
             mainIframe.style.display = 'block';
             mainIframe.src = embedUrl;
             playerOverlay.style.opacity = '0';
         }
 
         async function stopAllPlayers() {
-            if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
-            if (shakaPlayer) { await shakaPlayer.unload(); }
-            mainVideo.pause();
-            mainVideo.removeAttribute('src');
-            mainVideo.load();
+            if (clapprPlayer) { clapprPlayer.destroy(); clapprPlayer = null; }
             mainIframe.src = "";
         }
 
@@ -300,7 +264,7 @@
             });
         }
 
-        // 🚀 DUAL ENGINE LOGIC: HLS.js for Speed, Shaka for DRM Power
+        // 🚀 CLAPPR PLAYER LOGIC (With DRM Support)
         async function loadStream(server) {
             currentPlayingUrl = server.url;
             renderChannels();
@@ -309,44 +273,49 @@
             
             await stopAllPlayers();
 
-            // কন্ডিশন ১: ভারী DRM চ্যানেল (Shaka Player ব্যবহার হবে)
             if (server.type === 'mpd' && server.drm_type === 'clearkey') {
                 mainIframe.style.display = 'none'; 
-                shakaContainer.style.display = 'block';
-                try {
-                    shakaPlayer.configure({ drm: { clearKeys: { [server.keyId]: server.key } } });
-                    await shakaPlayer.load(server.url);
-                    playerOverlay.style.opacity = '0';
-                } catch (e) { onPlayerError(e); }
+                clapprContainer.style.display = 'block';
+                
+                clapprPlayer = new Clappr.Player({
+                    source: server.url,
+                    parentId: "#clappr-container",
+                    width: '100%',
+                    height: '100%',
+                    autoPlay: true,
+                    plugins: [DashShakaPlayback],
+                    shakaConfiguration: {
+                        drm: { clearKeys: { [server.keyId]: server.key } }
+                    },
+                    mediacontrol: { seekbar: "#00ff66", buttons: "#ffffff" }
+                });
+
+                clapprPlayer.once(Clappr.Events.PLAYER_PLAY, () => { playerOverlay.style.opacity = '0'; });
+                clapprPlayer.once(Clappr.Events.PLAYER_ERROR, () => {
+                    if(server.embedUrl) switchToEmbed(server.embedUrl);
+                    else { playerOverlay.style.opacity = '1'; playerMsg.innerHTML = 'Stream Offline or Blocked.'; }
+                });
+
             } 
-            // কন্ডিশন ২: সাধারণ দ্রুত চ্যানেল (HLS.js ব্যবহার হবে)
             else if (server.type === 'hls' || server.url.includes('.m3u8')) {
                 mainIframe.style.display = 'none'; 
-                shakaContainer.style.display = 'block';
+                clapprContainer.style.display = 'block';
                 
-                if (Hls.isSupported()) {
-                    hlsInstance = new Hls();
-                    hlsInstance.loadSource(server.url);
-                    hlsInstance.attachMedia(mainVideo);
-                    hlsInstance.on(Hls.Events.MANIFEST_PARSED, function() {
-                        mainVideo.play().catch(e => console.log(e));
-                        playerOverlay.style.opacity = '0';
-                    });
-                    hlsInstance.on(Hls.Events.ERROR, function(event, data) {
-                        if (data.fatal) {
-                            if(server.embedUrl) switchToEmbed(server.embedUrl);
-                            else onPlayerError(data);
-                        }
-                    });
-                } else if (mainVideo.canPlayType('application/vnd.apple.mpegurl')) {
-                    mainVideo.src = server.url;
-                    mainVideo.addEventListener('loadedmetadata', function() {
-                        mainVideo.play();
-                        playerOverlay.style.opacity = '0';
-                    });
-                }
+                clapprPlayer = new Clappr.Player({
+                    source: server.url,
+                    parentId: "#clappr-container",
+                    width: '100%',
+                    height: '100%',
+                    autoPlay: true,
+                    mediacontrol: { seekbar: "#00ff66", buttons: "#ffffff" }
+                });
+
+                clapprPlayer.once(Clappr.Events.PLAYER_PLAY, () => { playerOverlay.style.opacity = '0'; });
+                clapprPlayer.once(Clappr.Events.PLAYER_ERROR, () => {
+                    if(server.embedUrl) switchToEmbed(server.embedUrl);
+                    else { playerOverlay.style.opacity = '1'; playerMsg.innerHTML = 'Stream Offline or Blocked.'; }
+                });
             } 
-            // কন্ডিশন ৩: ডিরেক্ট ওয়েব সোর্স বা আইফ্রেম
             else {
                 switchToEmbed(server.embedUrl || server.url);
             }
@@ -364,7 +333,6 @@
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
-            await initShakaPlayer();
             loadChannels();
             setInterval(() => { document.getElementById('local-time').textContent = new Date().toLocaleTimeString('en-US', {hour12: false}); }, 1000);
             
