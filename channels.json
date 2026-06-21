@@ -2,6 +2,13 @@
   "updated": "2026-06-21",
   "servers": [
     {
+      "name": "TNS (FHD)",
+      "url": "https://embed.st/embed/admin/ppv-tunisia-vs-japan/1",
+      "embedUrl": "https://xyzstreams.shop/wc-1-embed",
+      "category": "FIFA World Cup,Sports",
+      "type": "embed"
+    },
+    {
       "name": "Fox Streams",
       "url": "https://xyzstreams.shop/wc-1-embed",
       "embedUrl": "https://xyzstreams.shop/wc-1-embed",
@@ -23,10 +30,10 @@
       "type": "hls"
     },
     {
-      "name": "FOX",
-      "url": "https://xyzstreams.shop/wc-1-embed",
+      "name": "BBC (FHD ",
+      "url": "https://embed.st/embed/admin/ppv-tunisia-vs-japan/5",
       "embedUrl": "https://junkieembeds.pages.dev/embed/fox-usa",
-      "category": "FIFA World Cup,4K",
+      "category": "FIFA World Cup,",
       "type": "embed"
     },
     {
@@ -129,6 +136,20 @@
       "drm_type": "clearkey",
       "keyId": "f6564ec2acc819046328a0c153be574d",
       "key": "ff46a8a1831eb27cf22576a077c98ab7"
-    }
+    },
+    {
+      "name": "Balle Balle Music",
+      "url": "https://mcncdndigital.com/balleballetv/index.m3u8",
+      "embedUrl": " ",
+      "category": "Music",
+      "type": "hls"
+    },
+    {
+      "name": "Panjabi Hits Song",
+      "url": "https://stream.ottlive.co.in/punjabihits/tracks-v1a1/mono.m3u8",
+      "embedUrl": " ",
+      "category": "Music",
+      "type": "hls"
+    },
   ]
 }
