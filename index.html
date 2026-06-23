@@ -6,9 +6,9 @@
     <title>RS 4K TV | FIFA WORLD CUP</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Rajdhani:wght@500;600;700;800&family=Great+Vibes&display=swap" rel="stylesheet">
     
-    <!-- ১. লেটেস্ট HLS.js (HEVC ভিডিও ডিকোড করার মূল চাবিকাঠি) -->
+    <!-- ১. লেটেস্ট খাঁটি HLS.js ইঞ্জিন -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
-    <!-- ২. ক্লাপার প্লেয়ার -->
+    <!-- ২. ক্লাপার ও শাকা (শুধুমাত্র MPD/DRM এর জন্য) -->
     <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dash-shaka-playback@3.0.0/dist/dash-shaka-playback.min.js"></script>
     
@@ -56,19 +56,7 @@
         .cat-btn:hover { background: rgba(255,255,255,0.1); }
         .cat-btn.active { background: var(--electric-cyan); color: #000; border-color: var(--electric-cyan); }
         
-        .server-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
-            gap: 12px; 
-            padding: 20px 25px 25px; 
-            max-height: 450px; 
-            overflow-y: auto; 
-            overflow-x: hidden; 
-            width: 100%; 
-            position: relative; 
-            z-index: 10;
-        }
-        
+        .server-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; padding: 20px 25px 25px; max-height: 450px; overflow-y: auto; overflow-x: hidden; width: 100%; position: relative; z-index: 10;}
         .server-grid::-webkit-scrollbar { width: 4px; height: 0px; }
         .server-grid::-webkit-scrollbar-track { background: transparent; }
         .server-grid::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.3); border-radius: 10px; }
@@ -136,8 +124,12 @@
         <div class="animate-up" style="display: flex; flex-direction: column; gap: 20px; width: 100%;">
             <div class="player-wrapper" id="player-container">
                 <div id="player-overlay" class="player-overlay"><span id="player-msg" style="font-size: 1.2rem; font-weight: 700;">CONNECTING...</span></div>
+                
                 <iframe id="main-iframe" src="" allowfullscreen="true" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" scrolling="no" frameborder="0" style="display:none;"></iframe>
                 <div id="clappr-container" style="display:none; width:100%; height:100%; position:absolute; top:0; left:0; z-index:2;"></div>
+                
+                <!-- 🚀 খাঁটি HLS.js এর জন্য নেটিভ প্লেয়ার -->
+                <video id="native-hls-player" controls autoplay playsinline style="display:none; width:100%; height:100%; position:absolute; top:0; left:0; z-index:3; background:#000;"></video>
             </div>
             
             <div class="glass-panel">
@@ -191,12 +183,15 @@
 
         let activeCategory = "All";
         let currentPlayingUrl = "";
+        
         let clapprPlayer = null;
+        let pureHlsInstance = null;
 
         const serverContainer = document.getElementById('server-container');
         const categoryContainer = document.getElementById('category-container');
         const mainIframe = document.getElementById('main-iframe');
         const clapprContainer = document.getElementById('clappr-container');
+        const nativeHlsPlayer = document.getElementById('native-hls-player');
         const playerOverlay = document.getElementById('player-overlay');
         const playerMsg = document.getElementById('player-msg');
         const playerWrapper = document.getElementById('player-container');
@@ -207,25 +202,24 @@
             } else { document.exitFullscreen(); }
         });
 
-        // 🛡️ Safe Embed Fallback (আইফ্রেম দিয়ে যেন ফাইল ডাউনলোড না হয়ে যায়)
         function switchToEmbed(embedUrl) {
             if (!embedUrl || embedUrl.includes('.m3u8') || embedUrl.includes('.mpd')) {
                 playerOverlay.style.opacity = '1';
                 playerMsg.innerHTML = '⚠️ Stream Offline or Unsupported by this Browser.';
                 return;
             }
-            if (clapprPlayer) { clapprPlayer.destroy(); clapprPlayer = null; }
-            clapprContainer.style.display = 'none';
+            stopAllPlayers();
             mainIframe.style.display = 'block';
             mainIframe.src = embedUrl;
             playerOverlay.style.opacity = '0';
         }
 
-        async function stopAllPlayers() {
+        function stopAllPlayers() {
             if (clapprPlayer) { clapprPlayer.destroy(); clapprPlayer = null; }
-            mainIframe.src = "";
-            mainIframe.style.display = 'none';
+            if (pureHlsInstance) { pureHlsInstance.destroy(); pureHlsInstance = null; }
+            mainIframe.src = ""; mainIframe.style.display = 'none';
             clapprContainer.style.display = 'none';
+            nativeHlsPlayer.style.display = 'none'; nativeHlsPlayer.pause(); nativeHlsPlayer.src = "";
         }
 
         function renderCategories() {
@@ -276,48 +270,47 @@
             playerOverlay.style.opacity = '1';
             playerMsg.innerHTML = 'CONNECTING SECURELY...';
             
-            await stopAllPlayers();
+            stopAllPlayers();
 
+            // লজিক ১: MPD হলে ক্লাপার চলবে
             if (server.type === 'mpd' && server.drm_type === 'clearkey') {
                 clapprContainer.style.display = 'block';
                 clapprPlayer = new Clappr.Player({
-                    source: server.url,
-                    parentId: "#clappr-container",
+                    source: server.url, parentId: "#clappr-container",
                     width: '100%', height: '100%', autoPlay: true,
                     plugins: [DashShakaPlayback],
                     shakaConfiguration: { drm: { clearKeys: { [server.keyId]: server.key } } },
                     mediacontrol: { seekbar: "#00ff66", buttons: "#ffffff" }
                 });
-
                 clapprPlayer.once(Clappr.Events.PLAYER_PLAY, () => { playerOverlay.style.opacity = '0'; });
                 clapprPlayer.once(Clappr.Events.PLAYER_ERROR, () => { switchToEmbed(server.embedUrl); });
             } 
+            // লজিক ২: HLS (.m3u8) হলে সরাসরি খাঁটি Hls.js চলবে (ঠিক ডেমো সাইটের মতো)
             else if (server.type === 'hls' || server.url.includes('.m3u8')) {
-                clapprContainer.style.display = 'block';
-                clapprPlayer = new Clappr.Player({
-                    source: server.url,
-                    parentId: "#clappr-container",
-                    width: '100%', height: '100%', autoPlay: true,
+                nativeHlsPlayer.style.display = 'block';
+                
+                if (Hls.isSupported()) {
+                    pureHlsInstance = new Hls({ maxBufferLength: 30, liveSyncDuration: 10 });
+                    pureHlsInstance.loadSource(server.url);
+                    pureHlsInstance.attachMedia(nativeHlsPlayer);
                     
-                    // 🚀 Modern HLS.js Engine Hook
-                    playback: {
-                        hlsjsConfig: {
-                            debug: false,
-                            enableWorker: true,
-                            lowLatencyMode: true,
-                            maxBufferLength: 30,
-                            liveSyncDuration: 10
-                        }
-                    },
-                    mediacontrol: { seekbar: "#00ff66", buttons: "#ffffff" }
-                });
-
-                clapprPlayer.once(Clappr.Events.PLAYER_PLAY, () => { playerOverlay.style.opacity = '0'; });
-                clapprPlayer.once(Clappr.Events.PLAYER_ERROR, () => { switchToEmbed(server.embedUrl); });
+                    pureHlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+                        playerOverlay.style.opacity = '0';
+                        nativeHlsPlayer.play().catch(e => console.log("Autoplay blocked"));
+                    });
+                    pureHlsInstance.on(Hls.Events.ERROR, (event, data) => {
+                        if (data.fatal) switchToEmbed(server.embedUrl);
+                    });
+                } 
+                else if (nativeHlsPlayer.canPlayType('application/vnd.apple.mpegurl')) { // Safari
+                    nativeHlsPlayer.src = server.url;
+                    nativeHlsPlayer.addEventListener('loadedmetadata', () => {
+                        playerOverlay.style.opacity = '0'; nativeHlsPlayer.play();
+                    });
+                    nativeHlsPlayer.addEventListener('error', () => { switchToEmbed(server.embedUrl); });
+                } else { switchToEmbed(server.embedUrl); }
             } 
-            else {
-                switchToEmbed(server.embedUrl || server.url);
-            }
+            else { switchToEmbed(server.embedUrl || server.url); }
         }
 
         async function loadChannels() {
@@ -334,7 +327,7 @@
             loadChannels();
             setInterval(() => { document.getElementById('local-time').textContent = new Date().toLocaleTimeString('en-US', {hour12: false}); }, 1000);
             
-            const API_KEY = ""; // <--- Put your api-sports.io Key here
+            const API_KEY = ""; 
             const API_BASE = "https://v3.football.api-sports.io";
             const API_HEADERS = { "x-rapidapi-host": "v3.football.api-sports.io", "x-apisports-key": API_KEY };
             const liveContainer = document.getElementById('api-live-match');
