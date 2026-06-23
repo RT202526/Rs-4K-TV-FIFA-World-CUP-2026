@@ -6,6 +6,9 @@
     <title>RS 4K TV | FIFA WORLD CUP</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Rajdhani:wght@500;600;700;800&family=Great+Vibes&display=swap" rel="stylesheet">
     
+    <!-- ১. লেটেস্ট HLS.js (HEVC ভিডিও ডিকোড করার মূল চাবিকাঠি) -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
+    <!-- ২. ক্লাপার প্লেয়ার -->
     <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dash-shaka-playback@3.0.0/dist/dash-shaka-playback.min.js"></script>
     
@@ -99,16 +102,13 @@
         .dev-label { font-size: 0.8rem; color: #aaa; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; display: block;}
         .signature { font-family: var(--font-signature); font-size: 2.5rem; color: var(--gold-primary); text-shadow: 0 0 15px var(--gold-primary); }
         
-        @media (max-width: 1200px) { 
-            .container { display: flex; flex-direction: column; } 
-        }
+        @media (max-width: 1200px) { .container { display: flex; flex-direction: column; } }
         @media (max-width: 768px) {
             header { padding: 15px; flex-direction: column; gap: 10px; align-items: flex-start; text-align: left; }
             .brand-name { font-size: 1.4rem; }
             .header-meta { width: 100%; justify-content: space-between; flex-direction: row; gap: 10px; }
             .time-display { font-size: 1rem; text-align: left !important; }
             .live-indicator { width: auto; font-size: 0.8rem; padding: 6px 15px; }
-            
             .server-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 15px; }
             .server-btn { padding: 12px 25px 12px 10px; font-size: 0.85rem; }
             .fav-btn { right: 5px; font-size: 1rem; }
@@ -133,13 +133,10 @@
     </header>
 
     <main class="container">
-        
         <div class="animate-up" style="display: flex; flex-direction: column; gap: 20px; width: 100%;">
             <div class="player-wrapper" id="player-container">
                 <div id="player-overlay" class="player-overlay"><span id="player-msg" style="font-size: 1.2rem; font-weight: 700;">CONNECTING...</span></div>
-                
                 <iframe id="main-iframe" src="" allowfullscreen="true" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" scrolling="no" frameborder="0" style="display:none;"></iframe>
-                
                 <div id="clappr-container" style="display:none; width:100%; height:100%; position:absolute; top:0; left:0; z-index:2;"></div>
             </div>
             
@@ -188,10 +185,12 @@
         window.addEventListener('beforeunload', () => window.scrollTo(0, 0));
 
         let rawServers = [];
-        let favorites = JSON.parse(localStorage.getItem('rs_favs')) || [];
+        let favorites = [];
+        try { favorites = JSON.parse(localStorage.getItem('rs_favs')) || []; } 
+        catch (e) { favorites = []; localStorage.removeItem('rs_favs'); }
+
         let activeCategory = "All";
         let currentPlayingUrl = "";
-        
         let clapprPlayer = null;
 
         const serverContainer = document.getElementById('server-container');
@@ -205,12 +204,17 @@
         playerWrapper.addEventListener('dblclick', () => {
             if (!document.fullscreenElement) {
                 playerWrapper.requestFullscreen().catch(err => console.log(err));
-            } else {
-                document.exitFullscreen();
-            }
+            } else { document.exitFullscreen(); }
         });
 
+        // 🛡️ Safe Embed Fallback (আইফ্রেম দিয়ে যেন ফাইল ডাউনলোড না হয়ে যায়)
         function switchToEmbed(embedUrl) {
+            if (!embedUrl || embedUrl.includes('.m3u8') || embedUrl.includes('.mpd')) {
+                playerOverlay.style.opacity = '1';
+                playerMsg.innerHTML = '⚠️ Stream Offline or Unsupported by this Browser.';
+                return;
+            }
+            if (clapprPlayer) { clapprPlayer.destroy(); clapprPlayer = null; }
             clapprContainer.style.display = 'none';
             mainIframe.style.display = 'block';
             mainIframe.src = embedUrl;
@@ -220,6 +224,8 @@
         async function stopAllPlayers() {
             if (clapprPlayer) { clapprPlayer.destroy(); clapprPlayer = null; }
             mainIframe.src = "";
+            mainIframe.style.display = 'none';
+            clapprContainer.style.display = 'none';
         }
 
         function renderCategories() {
@@ -264,7 +270,6 @@
             });
         }
 
-        // 🚀 CLAPPR PLAYER LOGIC (With DRM Support)
         async function loadStream(server) {
             currentPlayingUrl = server.url;
             renderChannels();
@@ -274,47 +279,41 @@
             await stopAllPlayers();
 
             if (server.type === 'mpd' && server.drm_type === 'clearkey') {
-                mainIframe.style.display = 'none'; 
                 clapprContainer.style.display = 'block';
-                
                 clapprPlayer = new Clappr.Player({
                     source: server.url,
                     parentId: "#clappr-container",
-                    width: '100%',
-                    height: '100%',
-                    autoPlay: true,
+                    width: '100%', height: '100%', autoPlay: true,
                     plugins: [DashShakaPlayback],
-                    shakaConfiguration: {
-                        drm: { clearKeys: { [server.keyId]: server.key } }
+                    shakaConfiguration: { drm: { clearKeys: { [server.keyId]: server.key } } },
+                    mediacontrol: { seekbar: "#00ff66", buttons: "#ffffff" }
+                });
+
+                clapprPlayer.once(Clappr.Events.PLAYER_PLAY, () => { playerOverlay.style.opacity = '0'; });
+                clapprPlayer.once(Clappr.Events.PLAYER_ERROR, () => { switchToEmbed(server.embedUrl); });
+            } 
+            else if (server.type === 'hls' || server.url.includes('.m3u8')) {
+                clapprContainer.style.display = 'block';
+                clapprPlayer = new Clappr.Player({
+                    source: server.url,
+                    parentId: "#clappr-container",
+                    width: '100%', height: '100%', autoPlay: true,
+                    
+                    // 🚀 Modern HLS.js Engine Hook
+                    playback: {
+                        hlsjsConfig: {
+                            debug: false,
+                            enableWorker: true,
+                            lowLatencyMode: true,
+                            maxBufferLength: 30,
+                            liveSyncDuration: 10
+                        }
                     },
                     mediacontrol: { seekbar: "#00ff66", buttons: "#ffffff" }
                 });
 
                 clapprPlayer.once(Clappr.Events.PLAYER_PLAY, () => { playerOverlay.style.opacity = '0'; });
-                clapprPlayer.once(Clappr.Events.PLAYER_ERROR, () => {
-                    if(server.embedUrl) switchToEmbed(server.embedUrl);
-                    else { playerOverlay.style.opacity = '1'; playerMsg.innerHTML = 'Stream Offline or Blocked.'; }
-                });
-
-            } 
-            else if (server.type === 'hls' || server.url.includes('.m3u8')) {
-                mainIframe.style.display = 'none'; 
-                clapprContainer.style.display = 'block';
-                
-                clapprPlayer = new Clappr.Player({
-                    source: server.url,
-                    parentId: "#clappr-container",
-                    width: '100%',
-                    height: '100%',
-                    autoPlay: true,
-                    mediacontrol: { seekbar: "#00ff66", buttons: "#ffffff" }
-                });
-
-                clapprPlayer.once(Clappr.Events.PLAYER_PLAY, () => { playerOverlay.style.opacity = '0'; });
-                clapprPlayer.once(Clappr.Events.PLAYER_ERROR, () => {
-                    if(server.embedUrl) switchToEmbed(server.embedUrl);
-                    else { playerOverlay.style.opacity = '1'; playerMsg.innerHTML = 'Stream Offline or Blocked.'; }
-                });
+                clapprPlayer.once(Clappr.Events.PLAYER_ERROR, () => { switchToEmbed(server.embedUrl); });
             } 
             else {
                 switchToEmbed(server.embedUrl || server.url);
@@ -326,8 +325,7 @@
                 const response = await fetch('./channels.json');
                 const data = await response.json();
                 rawServers = data.servers || [];
-                renderCategories();
-                renderChannels();
+                renderCategories(); renderChannels();
                 if (rawServers.length > 0) loadStream(rawServers[0]);
             } catch (error) { console.error(error); }
         }
@@ -336,7 +334,7 @@
             loadChannels();
             setInterval(() => { document.getElementById('local-time').textContent = new Date().toLocaleTimeString('en-US', {hour12: false}); }, 1000);
             
-            const API_KEY = ""; 
+            const API_KEY = ""; // <--- Put your api-sports.io Key here
             const API_BASE = "https://v3.football.api-sports.io";
             const API_HEADERS = { "x-rapidapi-host": "v3.football.api-sports.io", "x-apisports-key": API_KEY };
             const liveContainer = document.getElementById('api-live-match');
