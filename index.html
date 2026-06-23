@@ -121,6 +121,7 @@
     </header>
 
     <main class="container">
+        <!-- বামের সেকশন: ভিডিও প্লেয়ার ও সার্ভার লিস্ট -->
         <div class="animate-up" style="display: flex; flex-direction: column; gap: 20px; width: 100%;">
             <div class="player-wrapper" id="player-container">
                 <div id="player-overlay" class="player-overlay"><span id="player-msg" style="font-size: 1.2rem; font-weight: 700;">CONNECTING...</span></div>
@@ -128,7 +129,7 @@
                 <iframe id="main-iframe" src="" allowfullscreen="true" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" scrolling="no" frameborder="0" style="display:none;"></iframe>
                 <div id="clappr-container" style="display:none; width:100%; height:100%; position:absolute; top:0; left:0; z-index:2;"></div>
                 
-                <!-- 🚀 খাঁটি HLS.js এর জন্য নেটিভ প্লেয়ার -->
+                <!-- খাঁটি HLS.js এর নেটিভ প্লেয়ার -->
                 <video id="native-hls-player" controls autoplay playsinline style="display:none; width:100%; height:100%; position:absolute; top:0; left:0; z-index:3; background:#000;"></video>
             </div>
             
@@ -140,6 +141,7 @@
             </div>
         </div>
 
+        <!-- ডানের সেকশন: API লাইভ ম্যাচ ও আপকামিং ফিক্সচার -->
         <div class="animate-up delay-1" style="display: flex; flex-direction: column; gap: 20px; width: 100%;">
             <div class="glass-panel">
                 <div class="border-trace"></div>
@@ -172,6 +174,9 @@
         </div>
     </footer>
 
+    <!-- ========================================== -->
+    <!-- 🚀 MASTER JAVASCRIPT LOGIC -->
+    <!-- ========================================== -->
     <script>
         if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
         window.addEventListener('beforeunload', () => window.scrollTo(0, 0));
@@ -272,7 +277,6 @@
             
             stopAllPlayers();
 
-            // লজিক ১: MPD হলে ক্লাপার চলবে
             if (server.type === 'mpd' && server.drm_type === 'clearkey') {
                 clapprContainer.style.display = 'block';
                 clapprPlayer = new Clappr.Player({
@@ -285,7 +289,6 @@
                 clapprPlayer.once(Clappr.Events.PLAYER_PLAY, () => { playerOverlay.style.opacity = '0'; });
                 clapprPlayer.once(Clappr.Events.PLAYER_ERROR, () => { switchToEmbed(server.embedUrl); });
             } 
-            // লজিক ২: HLS (.m3u8) হলে সরাসরি খাঁটি Hls.js চলবে (ঠিক ডেমো সাইটের মতো)
             else if (server.type === 'hls' || server.url.includes('.m3u8')) {
                 nativeHlsPlayer.style.display = 'block';
                 
@@ -302,7 +305,7 @@
                         if (data.fatal) switchToEmbed(server.embedUrl);
                     });
                 } 
-                else if (nativeHlsPlayer.canPlayType('application/vnd.apple.mpegurl')) { // Safari
+                else if (nativeHlsPlayer.canPlayType('application/vnd.apple.mpegurl')) { 
                     nativeHlsPlayer.src = server.url;
                     nativeHlsPlayer.addEventListener('loadedmetadata', () => {
                         playerOverlay.style.opacity = '0'; nativeHlsPlayer.play();
@@ -323,40 +326,106 @@
             } catch (error) { console.error(error); }
         }
 
+        // ========================================================
+        // 🚀 DOM LOADED (INITIALIZE EVERYTHING)
+        // ========================================================
         document.addEventListener('DOMContentLoaded', async () => {
             loadChannels();
-            setInterval(() => { document.getElementById('local-time').textContent = new Date().toLocaleTimeString('en-US', {hour12: false}); }, 1000);
             
-            const API_KEY = ""; 
-            const API_BASE = "https://v3.football.api-sports.io";
-            const API_HEADERS = { "x-rapidapi-host": "v3.football.api-sports.io", "x-apisports-key": API_KEY };
-            const liveContainer = document.getElementById('api-live-match');
-            const fixContainer = document.getElementById('api-fixtures');
-            
-            async function fetchRealFootballData() {
-                if(!API_KEY) return;
-                try {
-                    const liveRes = await fetch(`${API_BASE}/fixtures?league=1&season=2026&live=all`, { headers: API_HEADERS });
-                    const liveData = await liveRes.json();
-                    if(liveData.response && liveData.response.length > 0) {
-                        const match = liveData.response[0]; const score = `${match.goals.home} - ${match.goals.away}`; const minute = match.fixture.status.elapsed + "'"; 
-                        liveContainer.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; width:100%; padding: 0 10px;"><div style="text-align:center;"><img src="${match.teams.home.logo}" width="60" style="border-radius:8px; margin-bottom:5px;"><br><span style="font-weight:bold; font-family:var(--font-display); font-size:1.2rem;">${match.teams.home.name}</span></div><div style="text-align:center;"><div style="font-size:2.5rem; font-weight:800; color:var(--gold-primary); text-shadow:0 0 15px var(--gold-primary);">${score}</div><div style="display:inline-block; background:rgba(0, 255, 102, 0.1); color:var(--neon-green); padding:4px 12px; border-radius:20px; font-weight:bold; border:1px solid var(--neon-green); margin-top:5px;"><span class="live-dot" style="display:inline-block; margin-right:5px; width:6px; height:6px;"></span>${minute}</div></div><div style="text-align:center;"><img src="${match.teams.away.logo}" width="60" style="border-radius:8px; margin-bottom:5px;"><br><span style="font-weight:bold; font-family:var(--font-display); font-size:1.2rem;">${match.teams.away.name}</span></div></div>`;
-                    } else { liveContainer.innerHTML = `<div class="unavailable-text" style="color:#aaa; text-shadow:none;">NO LIVE MATCHES CURRENTLY</div>`; }
+            setInterval(() => { 
+                const clk = document.getElementById('local-time');
+                if(clk) clk.textContent = new Date().toLocaleTimeString('en-US', {hour12: false}); 
+            }, 1000);
 
-                    const todayDate = new Date().toISOString().split('T')[0];
-                    const nextRes = await fetch(`${API_BASE}/fixtures?league=1&season=2026&date=${todayDate}`, { headers: API_HEADERS });
-                    const nextData = await nextRes.json();
-                    if(nextData.response && nextData.response.length > 0) {
-                        let html = '<div style="width:100%; display:flex; flex-direction:column; gap:10px;">';
-                        nextData.response.forEach(match => {
-                            const matchDate = new Date(match.fixture.date); const timeString = matchDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }); const dateString = matchDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                            html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px; background:rgba(0,0,0,0.5); border:1px solid var(--glass-border); border-radius:8px;"><div style="display:flex; align-items:center; gap:10px;"><img src="${match.teams.home.logo}" width="25"><span style="font-weight:bold; font-size:0.9rem;">${match.teams.home.name} <span style="color:#888;">vs</span> ${match.teams.away.name}</span><img src="${match.teams.away.logo}" width="25"></div><div style="text-align:right;"><div style="color:var(--electric-cyan); font-weight:bold; font-size:0.9rem;">${timeString}</div><div style="color:#888; font-size:0.75rem;">${dateString}</div></div></div>`;
-                        }); html += '</div>'; fixContainer.innerHTML = html;
-                    } else { fixContainer.innerHTML = `<div class="unavailable-text" style="color:#aaa; text-shadow:none;">NO MATCHES SCHEDULED FOR TODAY</div>`; }
-                } catch (error) { console.log(error); }
+            // ⚽ STREAMED.PK API INTEGRATION (FIFA SPECIAL)
+            const API_BASE = "https://streamed.pk/api/matches";
+            const IMAGE_BASE = "https://streamed.pk/api/images/badge";
+            const liveMatchBox = document.getElementById('api-live-match');
+            const fixturesBox = document.getElementById('api-fixtures');
+
+            async function fetchStreamedPkApi() {
+                try {
+                    // ১. লাইভ ফুটবল ম্যাচ
+                    const liveRes = await fetch(`${API_BASE}/live`);
+                    const liveMatches = await liveRes.json();
+                    const liveFootball = liveMatches.filter(m => m.category === 'football');
+
+                    if (liveFootball.length > 0) {
+                        let liveHtml = `<div style="width:100%; display:flex; flex-direction:column; gap:15px;">`;
+                        liveFootball.forEach(match => {
+                            let homeName = match.teams?.home?.name || match.title.split(' vs ')[0] || "Team A";
+                            let awayName = match.teams?.away?.name || match.title.split(' vs ')[1] || "Team B";
+                            let homeBadge = match.teams?.home?.badge ? `${IMAGE_BASE}/${match.teams.home.badge}.webp` : "";
+                            let awayBadge = match.teams?.away?.badge ? `${IMAGE_BASE}/${match.teams.away.badge}.webp` : "";
+
+                            liveHtml += `
+                            <div style="display:flex; justify-content:space-between; align-items:center; width:100%; padding: 15px 10px; background: rgba(255, 51, 51, 0.05); border: 1px solid var(--danger-red); border-radius: 12px;">
+                                <div style="text-align:center; flex:1;">
+                                    <img src="${homeBadge}" width="52" height="52" style="object-fit:contain; margin-bottom:5px;" onerror="this.style.display='none'"><br>
+                                    <span style="font-weight:700; font-family:var(--font-display); font-size:1.2rem;">${homeName}</span>
+                                </div>
+                                <div style="text-align:center; padding:0 10px;">
+                                    <div style="font-size:1.8rem; font-weight:800; color:var(--danger-red); text-shadow:0 0 15px rgba(255,51,51,0.6);">VS</div>
+                                    <div style="display:inline-block; background:rgba(255, 51, 51, 0.2); color:#fff; padding:4px 14px; border-radius:20px; font-weight:bold; font-size:0.8rem; margin-top:5px; border:1px solid var(--danger-red);">
+                                        <span class="live-dot" style="display:inline-block; margin-right:5px; width:6px; height:6px;"></span>LIVE NOW
+                                    </div>
+                                </div>
+                                <div style="text-align:center; flex:1;">
+                                    <img src="${awayBadge}" width="52" height="52" style="object-fit:contain; margin-bottom:5px;" onerror="this.style.display='none'"><br>
+                                    <span style="font-weight:700; font-family:var(--font-display); font-size:1.2rem;">${awayName}</span>
+                                </div>
+                            </div>`;
+                        });
+                        liveHtml += `</div>`;
+                        liveMatchBox.innerHTML = liveHtml;
+                    } else {
+                        liveMatchBox.innerHTML = `<div class="unavailable-text" style="color:#aaa; text-shadow:none;">NO LIVE MATCHES CURRENTLY</div>`;
+                    }
+
+                    // ২. আপকামিং ফুটবল ম্যাচ
+                    const upcomingRes = await fetch(`${API_BASE}/football`);
+                    const allFootball = await upcomingRes.json();
+                    const futureMatches = allFootball.filter(m => m.date > Date.now()).sort((a, b) => a.date - b.date).slice(0, 6);
+
+                    if (futureMatches.length > 0) {
+                        let fixHtml = '<div style="width:100%; display:flex; flex-direction:column; gap:10px;">';
+                        futureMatches.forEach(match => {
+                            const mDate = new Date(match.date);
+                            const timeStr = mDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                            const dateStr = mDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+                            let homeName = match.teams?.home?.name || match.title.split(' vs ')[0] || "Team A";
+                            let awayName = match.teams?.away?.name || match.title.split(' vs ')[1] || "Team B";
+                            let homeBadge = match.teams?.home?.badge ? `${IMAGE_BASE}/${match.teams.home.badge}.webp` : "";
+                            let awayBadge = match.teams?.away?.badge ? `${IMAGE_BASE}/${match.teams.away.badge}.webp` : "";
+
+                            fixHtml += `
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 15px; background:rgba(0,0,0,0.5); border:1px solid var(--glass-border); border-radius:8px; transition:0.3s;" onmouseover="this.style.borderColor='var(--gold-primary)'" onmouseout="this.style.borderColor='var(--glass-border)'">
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <img src="${homeBadge}" width="26" height="26" style="object-fit:contain;" onerror="this.style.display='none'">
+                                    <span style="font-weight:bold; font-size:0.95rem;">${homeName} <span style="color:#888; font-weight:normal; margin:0 4px;">vs</span> ${awayName}</span>
+                                    <img src="${awayBadge}" width="26" height="26" style="object-fit:contain;" onerror="this.style.display='none'">
+                                </div>
+                                <div style="text-align:right;">
+                                    <div style="color:var(--electric-cyan); font-weight:bold; font-size:1rem; font-family:var(--font-display); letter-spacing:0.5px;">${timeStr}</div>
+                                    <div style="color:#888; font-size:0.75rem; text-transform:uppercase;">${dateStr}</div>
+                                </div>
+                            </div>`;
+                        });
+                        fixHtml += '</div>';
+                        fixturesBox.innerHTML = fixHtml;
+                    } else {
+                        fixturesBox.innerHTML = `<div class="unavailable-text" style="color:#aaa; text-shadow:none;">NO UPCOMING MATCHES SCHEDULED</div>`;
+                    }
+                } catch (err) {
+                    console.error("API Error:", err);
+                }
             }
-            fetchRealFootballData();
+
+            fetchStreamedPkApi();
+            setInterval(fetchStreamedPkApi, 60000); // ১ মিনিট পর পর অটো রিফ্রেশ
             
+            // ব্যাকগ্রাউন্ডের সোনায় মোড়ানো পার্টিকেলস
             const canvas = document.getElementById('particles-bg'); const ctx = canvas.getContext('2d'); let particles = [];
             function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
             window.addEventListener('resize', resizeCanvas); resizeCanvas();
