@@ -41,7 +41,7 @@
       "url": "https://inproviszon.st/tsn4k.m3u8",
       "embedUrl": "https://xyzstreams.shop/wc-5-embed.html",
       "category": "FIFA World Cup,4K",
-      "type": "embed"
+      "type": "hls"
     },
     {
       "name": "US (EN) FOX 4K (HEVC)",
